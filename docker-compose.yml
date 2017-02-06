@@ -1,0 +1,29 @@
+version: '2'
+services: 
+    app:
+        build:
+            context: ./web_app
+            dockerfile: dockerfile
+        restart: always
+        ports:
+            - "5000:5000"
+        depends_on:
+            - redis
+    task:
+        build:
+            context: ./celery_tasks
+            dockerfile: Dockerfile
+        depends_on: 
+            - redis
+    monitor:
+        build:
+            context: ./celery_tasks
+            dockerfile: Dockerfile
+        ports:
+        - "5555:5555"
+        entrypoint: flower
+        command: -A tasks --port=5555 --broker=redis://redis:6379/0
+        depends_on: 
+        - redis
+    redis:
+        image: redis:3.2-alpine
